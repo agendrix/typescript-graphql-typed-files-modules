@@ -7,9 +7,6 @@ module.exports = {
     "<rootDir>/node_modules/",
   ],
   collectCoverageFrom: ["src/**/*.ts"],
-  moduleNameMapper: {
-    "^apollo-typed-documents$": "<rootDir>/src",
-  },
   transform: {
     "\\.(ts|js)$": "ts-jest",
     "\\.graphql$": "jest-transform-graphql",

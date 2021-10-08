@@ -1,5 +1,6 @@
 import { codegen } from "@graphql-codegen/core";
 import { Types } from "@graphql-codegen/plugin-helpers";
+import { plugin as typescriptOperationsPlugin } from "@graphql-codegen/typescript-operations";
 import { buildSchema, parse, printSchema } from "graphql";
 
 import * as codegenTypedDocuments from "../codegenTypedDocuments";
@@ -30,14 +31,17 @@ const getConfig = (
   filename: "not-relevant",
   schema: parse(printSchema(schema)),
   plugins: [
+    { typescriptOperationsPlugin: {} },
     {
       codegenTypedDocuments: {
-        typesModule: "@codegen-types",
         ...pluginOptions,
       },
     },
   ],
-  pluginMap: { codegenTypedDocuments },
+  pluginMap: {
+    typescriptOperationsPlugin: { plugin: typescriptOperationsPlugin },
+    codegenTypedDocuments,
+  },
   config: {},
   documents: [],
   ...generateOptions,
@@ -48,10 +52,30 @@ describe("codegenTypedDocuments", () => {
     const config = getConfig();
     const output = await codegen(config);
 
-    expect(output).toMatchInlineSnapshot(`""`);
+    expect(output).toBe("");
   });
 
-  it("should have ambient module declarations for each document", async () => {
+  it("should not have any output for fragment", async () => {
+    const fragmentDocument = parse(`
+      fragment authors on Author {
+        idField
+      }
+    `);
+
+    const document = {
+      document: fragmentDocument,
+      location: "authorFragment.gql",
+    };
+
+    const config = getConfig({ documents: [document] });
+    const output = await codegen(config);
+
+    expect(output).toBe(
+      "export type AuthorsFragment = { __typename?: 'Author', idField: string };\n"
+    );
+  });
+
+  it("should have default export for a single query document", async () => {
     const queryDocument = parse(`
       query authors {
         authors {
@@ -60,6 +84,27 @@ describe("codegenTypedDocuments", () => {
       }
     `);
 
+    const document = { document: queryDocument, location: "authors.gql" };
+
+    const config = getConfig({ documents: [document] });
+    const output = await codegen(config);
+
+    expect(output).toBe(
+      `
+import { TypedDocumentNode } from "@graphql-typed-document-node/core";
+
+export type AuthorsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null | undefined> | null | undefined };
+
+export const authors: TypedDocumentNode<AuthorsQuery, AuthorsQueryVariables>;
+export default authors;
+`.trimStart()
+    );
+  });
+
+  it("should have default export for a single mutation document", async () => {
     const mutationDocument = parse(`
       mutation createAuthor {
         createAuthor {
@@ -68,51 +113,49 @@ describe("codegenTypedDocuments", () => {
       }
     `);
 
-    const documents = [
-      { document: queryDocument, location: "authors.gql" },
-      { document: mutationDocument, location: "createAuthor.gql" },
-    ];
+    const document = {
+      document: mutationDocument,
+      location: "createAuthors.gql",
+    };
 
-    const config = getConfig({ documents });
+    const config = getConfig({ documents: [document] });
     const output = await codegen(config);
 
-    expect(output).toMatchInlineSnapshot(`
-      "declare module \\"*/authors.gql\\" {
-        import { TypedDocumentNode } from \\"apollo-typed-documents\\";
-        import { AuthorsQuery, AuthorsQueryVariables } from \\"@codegen-types\\";
-        export const authors: TypedDocumentNode<AuthorsQueryVariables, AuthorsQuery>;
-        export default authors;
-      }
+    expect(output).toBe(
+      `
+import { TypedDocumentNode } from "@graphql-typed-document-node/core";
 
-      declare module \\"*/createAuthor.gql\\" {
-        import { TypedDocumentNode } from \\"apollo-typed-documents\\";
-        import { CreateAuthorMutation, CreateAuthorMutationVariables } from \\"@codegen-types\\";
-        export const createAuthor: TypedDocumentNode<CreateAuthorMutationVariables, CreateAuthorMutation>;
-        export default createAuthor;
-      }"
-    `);
+export type CreateAuthorMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CreateAuthorMutation = { __typename?: 'Mutation', createAuthor: { __typename?: 'Author', idField: string } };
+
+export const createAuthor: TypedDocumentNode<CreateAuthorMutation, CreateAuthorMutationVariables>;
+export default createAuthor;
+`.trimStart()
+    );
   });
 
   it("should not have default exports for multiple operations", async () => {
-    const queryDocument = parse(`
+    const document = parse(`
       query authors {
         authors {
           idField
         }
       }
+
       query alsoAuthors {
         authors {
           idField
         }
-      }
-    `);
+      } 
 
-    const mutationDocument = parse(`
       mutation createAuthor {
         createAuthor {
           idField
         }
       }
+
       mutation alsoCreateAuthor {
         createAuthor {
           idField
@@ -120,134 +163,40 @@ describe("codegenTypedDocuments", () => {
       }
     `);
 
-    const documents = [
-      { document: queryDocument, location: "authors.gql" },
-      { document: mutationDocument, location: "createAuthor.gql" },
-    ];
-
-    const config = getConfig({ documents });
+    const config = getConfig({
+      documents: [{ document, location: "authors.gql" }],
+    });
     const output = await codegen(config);
 
-    expect(output).toMatchInlineSnapshot(`
-      "declare module \\"*/authors.gql\\" {
-        import { TypedDocumentNode } from \\"apollo-typed-documents\\";
-        import { AuthorsQuery, AuthorsQueryVariables } from \\"@codegen-types\\";
-        export const authors: TypedDocumentNode<AuthorsQueryVariables, AuthorsQuery>;
-        import { AlsoAuthorsQuery, AlsoAuthorsQueryVariables } from \\"@codegen-types\\";
-        export const alsoAuthors: TypedDocumentNode<AlsoAuthorsQueryVariables, AlsoAuthorsQuery>;
-      }
+    expect(output).toBe(
+      `
+import { TypedDocumentNode } from "@graphql-typed-document-node/core";
 
-      declare module \\"*/createAuthor.gql\\" {
-        import { TypedDocumentNode } from \\"apollo-typed-documents\\";
-        import { CreateAuthorMutation, CreateAuthorMutationVariables } from \\"@codegen-types\\";
-        export const createAuthor: TypedDocumentNode<CreateAuthorMutationVariables, CreateAuthorMutation>;
-        import { AlsoCreateAuthorMutation, AlsoCreateAuthorMutationVariables } from \\"@codegen-types\\";
-        export const alsoCreateAuthor: TypedDocumentNode<AlsoCreateAuthorMutationVariables, AlsoCreateAuthorMutation>;
-      }"
-    `);
-  });
+export type AuthorsQueryVariables = Exact<{ [key: string]: never; }>;
 
-  describe("module path customization", () => {
-    const queryDocument = parse(`
-      query authors {
-        authors {
-          idField
-        }
-      }
-    `);
 
-    const mutationDocument = parse(`
-      mutation createAuthor {
-        createAuthor {
-          idField
-        }
-      }
-    `);
+export type AuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null | undefined> | null | undefined };
 
-    const documents = [
-      { document: queryDocument, location: "literary/types/authors.gql" },
-      { document: mutationDocument, location: "mutations/createAuthor.gql" },
-    ];
+export type AlsoAuthorsQueryVariables = Exact<{ [key: string]: never; }>;
 
-    it("wildcards the basename by default", async () => {
-      const config = getConfig({ documents });
-      const output = await codegen(config);
 
-      expect(output).toMatchInlineSnapshot(`
-        "declare module \\"*/authors.gql\\" {
-          import { TypedDocumentNode } from \\"apollo-typed-documents\\";
-          import { AuthorsQuery, AuthorsQueryVariables } from \\"@codegen-types\\";
-          export const authors: TypedDocumentNode<AuthorsQueryVariables, AuthorsQuery>;
-          export default authors;
-        }
+export type AlsoAuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null | undefined> | null | undefined };
 
-        declare module \\"*/createAuthor.gql\\" {
-          import { TypedDocumentNode } from \\"apollo-typed-documents\\";
-          import { CreateAuthorMutation, CreateAuthorMutationVariables } from \\"@codegen-types\\";
-          export const createAuthor: TypedDocumentNode<CreateAuthorMutationVariables, CreateAuthorMutation>;
-          export default createAuthor;
-        }"
-      `);
-    });
+export type CreateAuthorMutationVariables = Exact<{ [key: string]: never; }>;
 
-    it("respects the relativeToCwd setting", async () => {
-      const config = getConfig({ documents }, { relativeToCwd: true });
-      const output = await codegen(config);
 
-      expect(output).toEqual(
-        expect.stringContaining(`declare module "*/literary/types/authors.gql"`)
-      );
-      expect(output).toEqual(
-        expect.stringContaining(`declare module "*/mutations/createAuthor.gql"`)
-      );
-    });
+export type CreateAuthorMutation = { __typename?: 'Mutation', createAuthor: { __typename?: 'Author', idField: string } };
 
-    it("respects the prefix setting", async () => {
-      const config = getConfig({ documents }, { prefix: "gql/" });
-      const output = await codegen(config);
+export type AlsoCreateAuthorMutationVariables = Exact<{ [key: string]: never; }>;
 
-      expect(output).toEqual(
-        expect.stringContaining(`declare module "gql/authors.gql"`)
-      );
-      expect(output).toEqual(
-        expect.stringContaining(`declare module "gql/createAuthor.gql"`)
-      );
-    });
 
-    it("respects the modulePathPrefix setting", async () => {
-      const config = getConfig({ documents }, { modulePathPrefix: "stuff/" });
-      const output = await codegen(config);
+export type AlsoCreateAuthorMutation = { __typename?: 'Mutation', createAuthor: { __typename?: 'Author', idField: string } };
 
-      expect(output).toEqual(
-        expect.stringContaining(`declare module "*/stuff/authors.gql"`)
-      );
-      expect(output).toEqual(
-        expect.stringContaining(`declare module "*/stuff/createAuthor.gql"`)
-      );
-    });
-
-    it("allows combining path settings", async () => {
-      const config = getConfig(
-        { documents },
-        {
-          prefix: "",
-          modulePathPrefix: "defs/",
-          relativeToCwd: true,
-        }
-      );
-
-      const output = await codegen(config);
-
-      expect(output).toEqual(
-        expect.stringContaining(
-          `declare module "defs/literary/types/authors.gql"`
-        )
-      );
-      expect(output).toEqual(
-        expect.stringContaining(
-          `declare module "defs/mutations/createAuthor.gql"`
-        )
-      );
-    });
+export const authors: TypedDocumentNode<AuthorsQuery, AuthorsQueryVariables>;
+export const alsoAuthors: TypedDocumentNode<AlsoAuthorsQuery, AlsoAuthorsQueryVariables>;
+export const createAuthor: TypedDocumentNode<CreateAuthorMutation, CreateAuthorMutationVariables>;
+export const alsoCreateAuthor: TypedDocumentNode<AlsoCreateAuthorMutation, AlsoCreateAuthorMutationVariables>;
+`.trimStart()
+    );
   });
 });
