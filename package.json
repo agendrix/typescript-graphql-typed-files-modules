@@ -1,6 +1,6 @@
 {
   "name": "typescript-graphql-typed-files-modules",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "Eric Matte <eric.matte@hotmail.ca>",
   "description": "Get type safety for your graphql documents.",
   "keywords": [
@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "rimraf lib && tsc && cp package.json lib/package.json",
-    "postversion": "git push --tags -f",
+    "postversion": "git push && git push --tags -f",
     "test": "jest"
   },
   "dependencies": {
