@@ -3,18 +3,13 @@
   "version": "2.0.0",
   "description": "Get type safety for your apollo documents.",
   "keywords": [
-    "apollo",
+    "module",
     "graphql",
+    "graphql-loader",
     "codegen"
   ],
-  "homepage": "https://github.com/rubengrill/apollo-typed-documents",
-  "repository": {
-    "url": "https://github.com/rubengrill/apollo-typed-documents",
-    "type": "git"
-  },
-  "author": "Ruben Grill <ruben@purelabs.io>",
   "license": "MIT",
-  "main": "lib/index.js",
+  "main": "lib/plugin.js",
   "files": [
     "lib"
   ],
@@ -23,10 +18,7 @@
     "preversion": "yarn test",
     "version": "yarn run build",
     "postversion": "git push && git push --tags",
-    "test": "jest",
-    "lint": "eslint --ext .js,.ts src/ examples/docs/",
-    "generate": "yarn run build && (cd examples/cra && yarn run generate) && (cd examples/cra-ts && yarn run generate) && (cd examples/docs && yarn run generate)",
-    "docs": "yarn run generate && md-magic --path README.md"
+    "test": "jest"
   },
   "dependencies": {
     "@graphql-codegen/visitor-plugin-common": "^1.13.3",
@@ -37,7 +29,6 @@
     "graphql": "^14.6.0"
   },
   "devDependencies": {
-    "@apollo/client": "^3.3.6",
     "@graphql-codegen/add": "^2.0.2",
     "@graphql-codegen/cli": "^1.19.4",
     "@graphql-codegen/core": "^1.17.9",
@@ -58,7 +49,6 @@
     "import-sort-style-module": "^6.0.0",
     "jest": "^26.6.3",
     "jest-transform-graphql": "^2.1.0",
-    "markdown-magic": "^1.0.0",
     "pascal-case": "^3.1.1",
     "prettier": "^2.2.1",
     "prettier-plugin-import-sort": "^0.0.6",

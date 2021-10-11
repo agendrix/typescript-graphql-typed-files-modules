@@ -3,7 +3,7 @@ import { Types } from "@graphql-codegen/plugin-helpers";
 import { plugin as typescriptOperationsPlugin } from "@graphql-codegen/typescript-operations";
 import { buildSchema, parse, printSchema } from "graphql";
 
-import * as codegenTypedDocuments from "../codegenTypedDocuments";
+import * as graphqlTypedFilesModules from "../plugin";
 
 const schema = buildSchema(`
   type Author {
@@ -26,28 +26,28 @@ const schema = buildSchema(`
 
 const getConfig = (
   generateOptions: Partial<Types.GenerateOptions> = {},
-  pluginOptions: Partial<codegenTypedDocuments.UserConfig> = {}
+  pluginOptions: Partial<graphqlTypedFilesModules.UserConfig> = {}
 ): Types.GenerateOptions => ({
   filename: "not-relevant",
   schema: parse(printSchema(schema)),
   plugins: [
     { typescriptOperationsPlugin: {} },
     {
-      codegenTypedDocuments: {
+      graphqlTypedFilesModules: {
         ...pluginOptions,
       },
     },
   ],
   pluginMap: {
     typescriptOperationsPlugin: { plugin: typescriptOperationsPlugin },
-    codegenTypedDocuments,
+    graphqlTypedFilesModules,
   },
   config: {},
   documents: [],
   ...generateOptions,
 });
 
-describe("codegenTypedDocuments", () => {
+describe("graphqlTypedFilesModules", () => {
   it("should not have any output when there are no documents", async () => {
     const config = getConfig();
     const output = await codegen(config);
