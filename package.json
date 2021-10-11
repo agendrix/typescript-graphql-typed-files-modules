@@ -1,7 +1,8 @@
 {
-  "name": "apollo-typed-documents",
-  "version": "2.0.0",
-  "description": "Get type safety for your apollo documents.",
+  "name": "typescript-graphql-typed-files-modules",
+  "version": "0.0.1",
+  "author": "Eric Matte <eric.matte@hotmail.ca>",
+  "description": "Get type safety for your graphql documents.",
   "keywords": [
     "module",
     "graphql",
@@ -9,15 +10,13 @@
     "codegen"
   ],
   "license": "MIT",
-  "main": "lib/plugin.js",
+  "main": "index.js",
   "files": [
     "lib"
   ],
   "scripts": {
-    "build": "rimraf lib && tsc",
-    "preversion": "yarn test",
-    "version": "yarn run build",
-    "postversion": "git push && git push --tags",
+    "build": "rimraf lib && tsc && cp package.json lib/package.json",
+    "postversion": "git push --tags -f",
     "test": "jest"
   },
   "dependencies": {

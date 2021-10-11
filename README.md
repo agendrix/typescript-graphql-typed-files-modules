@@ -47,7 +47,7 @@ generates:
       - add:
           content: "/** Generated File. Do not modify directly. */"
       - typescript-operations
-      - typescript-graphql-typed-files-modules/lib/plugin
+      - typescript-graphql-typed-files-modules
     config:
       skipTypename: true
 ```
