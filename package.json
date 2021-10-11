@@ -1,6 +1,6 @@
 {
   "name": "typescript-graphql-typed-files-modules",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "author": "Eric Matte <eric.matte@hotmail.ca>",
   "description": "Get type safety for your graphql documents.",
   "keywords": [
