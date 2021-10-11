@@ -10,12 +10,13 @@
     "codegen"
   ],
   "license": "MIT",
-  "main": "index.js",
+  "main": "lib/index.js",
   "files": [
     "lib"
   ],
   "scripts": {
-    "build": "rimraf lib && tsc && cp package.json lib/package.json",
+    "build": "rimraf lib && tsc",
+    "prepublish": "yarn build",
     "postversion": "git push && git push --tags -f",
     "test": "jest"
   },

@@ -29,7 +29,7 @@ jobs:
         run: |
           version=$(echo $TAG | grep -o -E "[0-9.]+")
           git tag -d "v${version}"
-          yarn publish --new-version $version ./lib
+          yarn publish --new-version $version
         env:
           TAG: ${{ github.ref }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
