@@ -21,20 +21,20 @@
     "test": "jest"
   },
   "dependencies": {
-    "@graphql-codegen/visitor-plugin-common": "^1.13.3",
+    "@graphql-codegen/visitor-plugin-common": "^3.0.1",
     "pascal-case": "^3.1.1"
   },
   "peerDependencies": {
-    "@graphql-typed-document-node/core": "^3.1.0",
+    "@graphql-typed-document-node/core": "^3.1.2",
     "graphql": ">=14.6.0"
   },
   "devDependencies": {
-    "@graphql-codegen/add": "^2.0.2",
-    "@graphql-codegen/cli": "^1.19.4",
-    "@graphql-codegen/core": "^1.17.9",
-    "@graphql-codegen/plugin-helpers": "^1.18.2",
-    "@graphql-codegen/typescript": "^1.19.0",
-    "@graphql-codegen/typescript-operations": "^2.1.6",
+    "@graphql-codegen/add": "^4.0.1",
+    "@graphql-codegen/cli": "^3.2.1",
+    "@graphql-codegen/core": "^3.1.0",
+    "@graphql-codegen/plugin-helpers": "^4.0.0",
+    "@graphql-codegen/typescript": "^3.0.1",
+    "@graphql-codegen/typescript-operations": "^3.0.1",
     "@types/jest": "^26.0.19",
     "@types/node": "^14.14.14",
     "@types/react": "^17.0.0",

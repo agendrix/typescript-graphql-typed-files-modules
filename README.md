@@ -81,7 +81,7 @@ import { TypedDocumentNode } from "@graphql-typed-document-node/core";
 export type AuthorsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AuthorsQuery = { authors?: Array<{ idField: string } | null | undefined> | null | undefined };
+export type AuthorsQuery = { authors?: Array<{ idField: string } | null> | null };
 
 export const authors: TypedDocumentNode<AuthorsQuery, AuthorsQueryVariables>;
 export default authors;

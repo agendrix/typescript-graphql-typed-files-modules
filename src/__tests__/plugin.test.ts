@@ -14,8 +14,18 @@ const schema = buildSchema(`
     authors: [Author]
   }
 
+  type Request {
+    id: ID!
+  }
+
+  type CancelRequestResponse {
+    request: Request
+    error: String
+  }
+
   type Mutation {
     createAuthor: Author!
+    cancelRequest(id: ID!): CancelRequestResponse!
   }
 
   schema {
@@ -96,10 +106,48 @@ import { TypedDocumentNode } from "@graphql-typed-document-node/core";
 export type AuthorsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null | undefined> | null | undefined };
+export type AuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null> | null };
 
 export const authors: TypedDocumentNode<AuthorsQuery, AuthorsQueryVariables>;
 export default authors;
+`.trimStart()
+    );
+  });
+
+  it("should have default export for another single mutation document", async () => {
+    const mutationDocument = parse(`
+    mutation CancelRequest($id: ID!) {
+      cancelRequest(id: $id) {
+        request {
+          id
+        }
+    
+        error
+      }
+    }
+    `);
+
+    const document = {
+      document: mutationDocument,
+      location: "createAuthors.gql",
+    };
+
+    const config = getConfig({ documents: [document] });
+    const output = await codegen(config);
+
+    expect(output).toBe(
+      `
+import { TypedDocumentNode } from "@graphql-typed-document-node/core";
+
+export type CancelRequestMutationVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type CancelRequestMutation = { __typename?: 'Mutation', cancelRequest: { __typename?: 'CancelRequestResponse', error?: string | null, request?: { __typename?: 'Request', id: string } | null } };
+
+export const CancelRequest: TypedDocumentNode<CancelRequestMutation, CancelRequestMutationVariables>;
+export default CancelRequest;
 `.trimStart()
     );
   });
@@ -175,12 +223,12 @@ import { TypedDocumentNode } from "@graphql-typed-document-node/core";
 export type AuthorsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null | undefined> | null | undefined };
+export type AuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null> | null };
 
 export type AlsoAuthorsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type AlsoAuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null | undefined> | null | undefined };
+export type AlsoAuthorsQuery = { __typename?: 'Query', authors?: Array<{ __typename?: 'Author', idField: string } | null> | null };
 
 export type CreateAuthorMutationVariables = Exact<{ [key: string]: never; }>;
 

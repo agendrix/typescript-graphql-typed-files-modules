@@ -35,7 +35,7 @@ export const plugin: PluginFunction<UserConfig> = (_schema, documents, {}) => {
             'import { TypedDocumentNode } from "@graphql-typed-document-node/core";\n',
           ]
         : [],
-    content: output.join("\n\n"),
+    content,
   };
 };
 
