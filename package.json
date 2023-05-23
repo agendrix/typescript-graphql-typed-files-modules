@@ -1,7 +1,8 @@
 {
   "name": "typescript-graphql-typed-files-modules",
   "version": "0.2.0",
-  "author": "Eric Matte <eric.matte@hotmail.ca>",
+  "author": "Agendrix",
+  "repository": "github:agendrix/typescript-graphql-typed-files-modules",
   "description": "Get type safety for your graphql documents.",
   "keywords": [
     "module",
