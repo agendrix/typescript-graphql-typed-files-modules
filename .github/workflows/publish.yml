@@ -23,7 +23,6 @@ jobs:
           git config --local user.name "$(git log --format='%an' HEAD^!)"
 
       - run: yarn install
-      - run: yarn build
 
       - name: Publish build from ${{ github.ref }}
         run: |
